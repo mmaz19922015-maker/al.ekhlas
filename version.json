@@ -1,6 +1,6 @@
 {
-    "version":  "5.7.1",
-    "notes":  "إصلاح اتصال SQLite الدائم في نسخة Electron، وحفظ مسار قاعدة البيانات تلقائيًا، وتحسين الحفظ الذري والفوري.",
+    "version":  "5.8.0",
+    "notes":  "إصلاح التخزين الدائم لقاعدة SQLite، الحفظ اللحظي، استيراد قاعدة سابقة، وفحص التحديثات عند التشغيل والإغلاق مع تنبيه واضح.",
     "rawUrl":  "https://raw.githubusercontent.com/mmaz19922015-maker/al.ekhlas/main/app.html",
-    "sha256":  "1ef10a9f992028764fc1e396a3696be817af1a73c66171ba0f3a47c97dda5250"
+    "sha256":  "b972ecd2e304b65a6a20995524c45281a3ed2322d734f0b5a63232cbda74af69"
 }
