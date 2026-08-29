@@ -291,7 +291,7 @@ else if (typeof exports === 'object'){
 // V5.5.2 — تغيير اسم البرنامج بالكامل من "AL EKHLAS" إلى "برنامج الريان" بناءً على طلب صريح من صاحب البرنامج (العنوان، شعار الشريط الجانبي، شاشة "حول البرنامج"، الاسم الافتراضي لاسم المركز في الإعدادات، النص الافتراضي لعنصر العلامة المائية في مصمم الشهادات) — سطور التحديثات السابقة أعلاه تُركت كما هي كسجل تاريخي بلا تعديل.
 // V5.6.0 — معاينة الفاتورة الحية تعرض الآن فاتورة توضيحية بأرقام افتراضية بدل أن تبقى فارغة قبل اختيار طالب، زر مسح شعار الفاتورة، إصلاح خلل تجاوز حقول "حجم الشعار/حجم اسم المركز" لحدود إطارها، توسيع لوحة إعدادات الفاتورة قليلًا على حساب مساحة المعاينة، رسائل خطأ فحص التحديثات أصبحت تميّز بوضوح بين "لا يوجد اتصال إنترنت" و"لم يُنشر أي تحديث على المستودع بعد" (كان الاثنان يظهران بنفس الرسالة المضللة)، مصمم الشهادات: عنصر الصورة لم يعد يعرض حقل نص للكتابة (كان خطأً)، تحرير تقييد تكبير/تصغير العناصر ليصبح حرًا دون ربطه بموضعها، توسعة نطاق تكبير مساحة العمل، 4 خطوط جديدة (Montserrat، Scheherazade, KacstPoster، Lobster)، ميزة "براويز جاهزة" (5 إطارات تُطبَّق تلقائيًا حول الشهادة)، إصلاح خلل: نوع الشهادة الأفقي (وأي مقاس آخر) يتلاءم تلقائيًا الآن مع مساحة العمل المرئية عند تبديل المقاس دون أن يختفي أي جزء منه خارج الشاشة.
 // V5.7.0 — توسعة براويز الشهادات الجاهزة من 5 إلى 17 إطارًا (كل الأنماط الجديدة بخطوط CSS واضحة اللون بلا التباس بصري)، تحسين شامل وحديث لشكل جميع شاشات البرنامج (بطاقات إحصائية بظلال ورفع عند التمرير، أزرار بحركة وظل ناعمين، شريط جانبي بتدرج لوني وتمييز أوضح للعنصر النشط، جداول برؤوس أعمدة أوضح، حقول إدخال بحدود تركيز أنعم، نوافذ منبثقة بظل أعمق وحواف أدور، شريط تمرير مخصص) مع إبقاء كل الوظائف والألوان القابلة للتخصيص كما هي، إضافة زر "تصدير CSV" في شاشات الطلاب/الكورسات/المدربين/الدفعات لتصدير الجداول مباشرة كملف يفتح في إكسل، فحص أمني شامل لنظام التفعيل والحماية (اختبار حقيقي بمفاتيح موقّعة فعليًا يؤكد: رفض المفاتيح المنتهية عند التفعيل، قفل البرنامج تلقائيًا خلال 30 دقيقة كحد أقصى من انتهاء المدة، مقاومة إرجاع ساعة الجهاز للخلف بعد القفل، عدم كفاية حذف بيانات متصفح واحد فقط للالتفاف على الحماية، عمل المفتاح الدائم بلا انتهاء أبدًا).
-const APP_VERSION='5.7.0';
+const APP_VERSION='5.7.1';
 const DB_KEY='alekhlas_rebuilt_v2';
 const CURRENCIES=[['JOD','د.أ','الأردن'],['SAR','ر.س','السعودية'],['AED','د.إ','الإمارات'],['QAR','ر.ق','قطر'],['KWD','د.ك','الكويت'],['BHD','د.ب','البحرين'],['OMR','ر.ع','عُمان'],['EGP','ج.م','مصر'],['IQD','ع.ع','العراق'],['SYP','ل.س','سوريا'],['LBP','ل.ل','لبنان'],['LYD','ل.د','ليبيا'],['TND','د.ت','تونس'],['DZD','دج','الجزائر'],['MAD','د.م','المغرب'],['YER','ر.ي','اليمن'],['SDG','ج.س','السودان'],['EUR','€','أوروبا'],['USD','$','الولايات المتحدة']];
 const blank=()=>({students:[],courses:[],trainers:[],payments:[],templates:[],settings:{center:'الريان',lang:'ar',currency:'JOD',scale:100,theme:'light',primary:'#2563eb',invoice:{logo:'',showCenter:true,showLogo:true,logoSize:80,centerSize:28,columns:['student','id','course','hours','days','price','date','amount','note']}},seq:{student:0,payment:0,trainer:0,certificate:1000}});
@@ -306,20 +306,126 @@ async function idbGetHandle(){try{const db=await idbOpen();return new Promise(re
 function sqlSchema(db){db.run(`CREATE TABLE IF NOT EXISTS students(id TEXT PRIMARY KEY,name TEXT,courseId TEXT,phone TEXT,country TEXT,date TEXT,notes TEXT);CREATE TABLE IF NOT EXISTS courses(id TEXT PRIMARY KEY,name TEXT,level TEXT,days INTEGER,hours INTEGER,price REAL,trainerId TEXT);CREATE TABLE IF NOT EXISTS trainers(id TEXT PRIMARY KEY,name TEXT,specialty TEXT,phone TEXT);CREATE TABLE IF NOT EXISTS payments(id TEXT PRIMARY KEY,studentId TEXT,courseId TEXT,amount REAL,date TEXT,note TEXT,nextAmount REAL,nextDate TEXT);CREATE TABLE IF NOT EXISTS templates(id TEXT PRIMARY KEY,name TEXT,bg TEXT,bgColor TEXT,paper TEXT,elements TEXT,images TEXT);CREATE TABLE IF NOT EXISTS kv(key TEXT PRIMARY KEY,value TEXT);CREATE TABLE IF NOT EXISTS license_mirror(key TEXT PRIMARY KEY,value TEXT);`)}
 function sqlAll(db,sql){const res=db.exec(sql);if(!res.length)return[];const cols=res[0].columns;return res[0].values.map(row=>{const o={};cols.forEach((c,i)=>o[c]=row[i]);return o})}
 function loadStateFromDb(db){const b=blank();b.students=sqlAll(db,'SELECT * FROM students').map(r=>({id:r.id,name:r.name||'',courseId:r.courseId||'',phone:r.phone||'',country:r.country||'',date:r.date||'',notes:r.notes||''}));b.courses=sqlAll(db,'SELECT * FROM courses').map(r=>({id:r.id,name:r.name||'',level:r.level||'1',days:r.days||0,hours:r.hours||0,price:r.price||0,trainerId:r.trainerId||''}));b.trainers=sqlAll(db,'SELECT * FROM trainers').map(r=>({id:r.id,name:r.name||'',specialty:r.specialty||'',phone:r.phone||''}));b.payments=sqlAll(db,'SELECT * FROM payments').map(r=>({id:r.id,studentId:r.studentId||'',courseId:r.courseId||'',amount:r.amount||0,date:r.date||'',note:r.note||'',nextAmount:r.nextAmount||0,nextDate:r.nextDate||''}));b.templates=sqlAll(db,'SELECT * FROM templates').map(r=>{try{return{id:r.id,name:r.name||'',bg:r.bg||'',bgColor:r.bgColor||'#fff',paper:r.paper||'A4-LANDSCAPE',elements:JSON.parse(r.elements||'[]'),images:JSON.parse(r.images||'[]')}}catch(e){return{id:r.id,name:r.name||'',bg:'',bgColor:'#fff',paper:'A4-LANDSCAPE',elements:[],images:[]}}});const kv=sqlAll(db,'SELECT * FROM kv');const sRow=kv.find(r=>r.key==='settings');if(sRow)try{b.settings={...b.settings,...JSON.parse(sRow.value)}}catch(e){}const qRow=kv.find(r=>r.key==='seq');if(qRow)try{b.seq={...b.seq,...JSON.parse(qRow.value)}}catch(e){}return normalize(b)}
-function saveStateToDb(db,st){db.run('DELETE FROM students;DELETE FROM courses;DELETE FROM trainers;DELETE FROM payments;DELETE FROM templates;DELETE FROM kv;');let stmt=db.prepare('INSERT INTO students VALUES (?,?,?,?,?,?,?)');st.students.forEach(s=>stmt.run([s.id,s.name||'',s.courseId||'',s.phone||'',s.country||'',s.date||'',s.notes||'']));stmt.free();stmt=db.prepare('INSERT INTO courses VALUES (?,?,?,?,?,?,?)');st.courses.forEach(c=>stmt.run([c.id,c.name||'',c.level||'1',c.days||0,c.hours||0,c.price||0,c.trainerId||'']));stmt.free();stmt=db.prepare('INSERT INTO trainers VALUES (?,?,?,?)');st.trainers.forEach(t=>stmt.run([t.id,t.name||'',t.specialty||'',t.phone||'']));stmt.free();stmt=db.prepare('INSERT INTO payments VALUES (?,?,?,?,?,?,?,?)');st.payments.forEach(p=>stmt.run([p.id,p.studentId||'',p.courseId||'',p.amount||0,p.date||'',p.note||'',p.nextAmount||0,p.nextDate||'']));stmt.free();stmt=db.prepare('INSERT INTO templates VALUES (?,?,?,?,?,?,?)');st.templates.forEach(t=>stmt.run([t.id,t.name||'',t.bg||'',t.bgColor||'#fff',t.paper||'A4-LANDSCAPE',JSON.stringify(t.elements||[]),JSON.stringify(t.images||[])]));stmt.free();stmt=db.prepare('INSERT INTO kv VALUES (?,?)');stmt.run(['settings',JSON.stringify(st.settings)]);stmt.run(['seq',JSON.stringify(st.seq)]);stmt.free()}
-async function flushSqlToFile(){if(!fileHandle||!sqlDb)return;const data=sqlDb.export();const writable=await fileHandle.createWritable();await writable.write(data);await writable.close()}
+function saveStateToDb(db,st){
+ db.run('BEGIN TRANSACTION');
+ try{
+  db.run('DELETE FROM students;DELETE FROM courses;DELETE FROM trainers;DELETE FROM payments;DELETE FROM templates;DELETE FROM kv;');
+  let stmt=db.prepare('INSERT INTO students VALUES (?,?,?,?,?,?,?)');
+  st.students.forEach(s=>stmt.run([s.id,s.name||'',s.courseId||'',s.phone||'',s.country||'',s.date||'',s.notes||'']));stmt.free();
+  stmt=db.prepare('INSERT INTO courses VALUES (?,?,?,?,?,?,?)');
+  st.courses.forEach(c=>stmt.run([c.id,c.name||'',c.level||'1',c.days||0,c.hours||0,c.price||0,c.trainerId||'']));stmt.free();
+  stmt=db.prepare('INSERT INTO trainers VALUES (?,?,?,?)');
+  st.trainers.forEach(t=>stmt.run([t.id,t.name||'',t.specialty||'',t.phone||'']));stmt.free();
+  stmt=db.prepare('INSERT INTO payments VALUES (?,?,?,?,?,?,?,?)');
+  st.payments.forEach(p=>stmt.run([p.id,p.studentId||'',p.courseId||'',p.amount||0,p.date||'',p.note||'',p.nextAmount||0,p.nextDate||'']));stmt.free();
+  stmt=db.prepare('INSERT INTO templates VALUES (?,?,?,?,?,?,?)');
+  st.templates.forEach(t=>stmt.run([t.id,t.name||'',t.bg||'',t.bgColor||'#fff',t.paper||'A4-LANDSCAPE',JSON.stringify(t.elements||[]),JSON.stringify(t.images||[])]));stmt.free();
+  stmt=db.prepare('INSERT INTO kv VALUES (?,?)');
+  stmt.run(['settings',JSON.stringify(st.settings)]);stmt.run(['seq',JSON.stringify(st.seq)]);stmt.free();
+  db.run('COMMIT');
+ }catch(e){
+  try{db.run('ROLLBACK')}catch(_){}
+  throw e;
+ }
+}
+async function flushSqlToFile(){
+ if(!sqlDb)return;
+ const data=sqlDb.export();
+ if(window.ekhlasDesktop?.isDesktop&&window.ekhlasDesktop.storage){
+   const r=await window.ekhlasDesktop.storage.write(data);
+   if(!r?.ok)throw new Error(r?.message||r?.reason||'تعذر الكتابة إلى ملف SQLite');
+   return;
+ }
+ if(!fileHandle)return;
+ const writable=await fileHandle.createWritable();await writable.write(data);await writable.close()
+}
 let sqlFlushChain=Promise.resolve();
 function queueSqlFlush(){sqlFlushChain=sqlFlushChain.then(()=>flushSqlToFile()).catch(e=>{console.error('SQLite flush to disk failed',e);notify('⚠ تعذر حفظ آخر تعديل في ملف SQLite على القرص: '+e.message,'err')});return sqlFlushChain}
 function dataIntegrityReport(){const issues=[];const dup=(arr,label)=>{const s=new Set(arr);if(s.size!==arr.length)issues.push('يوجد '+label+' مكررة')};dup(state.students.map(s=>s.id),'معرّفات طلاب');dup(state.courses.map(c=>c.id),'معرّفات كورسات');dup(state.trainers.map(t=>t.id),'معرّفات مدربين');dup(state.payments.map(p=>p.id),'معرّفات دفعات');state.payments.forEach(p=>{if(!state.students.some(s=>s.id===p.studentId))issues.push('دفعة '+p.id+' مرتبطة بطالب غير موجود (بيانات يتيمة)')});state.students.forEach(s=>{if(s.courseId&&!state.courses.some(c=>c.id===s.courseId))issues.push('الطالب '+s.id+' مرتبط بكورس غير موجود')});state.courses.forEach(c=>{if(c.trainerId&&!state.trainers.some(t=>t.id===c.trainerId))issues.push('الكورس '+c.id+' مرتبط بمدرب غير موجود')});state.students.forEach(s=>{if(due(s.id,s.courseId)<-0.01)issues.push('قيمة مستحق سالبة للطالب '+s.id)});state.payments.forEach(p=>{if(Number(p.amount||0)<0)issues.push('دفعة بمبلغ سالب: '+p.id)});return issues}
 function runIntegrityCheck(){const issues=dataIntegrityReport();if(!issues.length){notify('✓ فحص سلامة البيانات: لا توجد أي مشاكل. كل الروابط والمعرفات والقيم المالية سليمة.','ok');return}openAppModal('نتيجة فحص سلامة البيانات',`<div class="notice warn">تم رصد ${issues.length} ملاحظة:</div><div class="list" style="margin-top:10px">${issues.map(x=>`<div class="listitem">${esc(x)}</div>`).join('')}</div>`,`<button class="btn" onclick="closeAppModal()">إغلاق</button>`)}
 async function initSqlEngine(){if(SQL)return SQL;SQL=await initSqlJs({wasmBinary:base64ToBytes(document.getElementById('sqlWasmB64').textContent)});return SQL}
-async function connectStorageFolder(handle,opts={}){await initSqlEngine();dirHandle=handle;fileHandle=await handle.getFileHandle('alekhlas.sqlite',{create:true});const file=await fileHandle.getFile();const buf=new Uint8Array(await file.arrayBuffer());if(buf.length){let loaded;try{const db=new SQL.Database(buf);sqlSchema(db);loaded=loadStateFromDb(db);sqlDb=db}catch(e){console.error('Corrupted SQLite file',e);notify('⚠ ملف alekhlas.sqlite الموجود في هذا المجلد تالف أو غير صالح — تم الإبقاء على بياناتك الحالية دون أي تعديل على ذلك الملف. جرّب اختيار مجلد آخر.','err');return}state=loaded}else{sqlDb=new SQL.Database();sqlSchema(sqlDb);saveStateToDb(sqlDb,state);await flushSqlToFile()}storageMode='sqlite';try{localStorage.setItem(DB_KEY,JSON.stringify(state))}catch(e){}applyTheme();renderAll();updateStorageStatus();const issues=dataIntegrityReport();if(issues.length)notify('⚠ تم الاتصال، لكن رُصدت '+issues.length+' ملاحظة على سلامة البيانات — راجع "فحص سلامة البيانات" في الإعدادات.','warn');else if(!opts.silent)notify('تم الاتصال بقاعدة بيانات SQLite بنجاح — يتم الحفظ الآن مباشرة في: '+handle.name+' / alekhlas.sqlite','ok')}
+async function connectStorageFolder(handle,opts={}){
+ await initSqlEngine();dirHandle=handle;fileHandle=await handle.getFileHandle('alekhlas.sqlite',{create:true});
+ const file=await fileHandle.getFile();const buf=new Uint8Array(await file.arrayBuffer());
+ return finishSqlConnection(buf,handle.name+' / alekhlas.sqlite',opts);
+}
+async function connectNativeStorage(opts={}){
+ if(!window.ekhlasDesktop?.storage)return false;
+ await initSqlEngine();
+ const r=await window.ekhlasDesktop.storage.read();
+ if(!r?.ok){
+   if(r?.reason==='not-configured')return false;
+   notify('⚠ تعذر فتح قاعدة SQLite المحفوظة: '+(r.message||r.reason||'خطأ غير معروف'),'err');
+   updateStorageStatus(); return false;
+ }
+ dirHandle=null;fileHandle=null;
+ const buf=r.data&&r.data.byteLength!==undefined?new Uint8Array(r.data):new Uint8Array(r.data||[]);
+ return finishSqlConnection(buf,r.dbPath,opts);
+}
+async function finishSqlConnection(buf,label,opts={}){
+ if(buf.length){
+   try{const db=new SQL.Database(buf);sqlSchema(db);sqlDb=db;state=loadStateFromDb(db)}
+   catch(e){console.error('Corrupted SQLite file',e);notify('⚠ ملف SQLite الموجود في المكان المحفوظ تالف أو غير صالح — لم يتم تعديل الملف. استخدم نسخة .bak أو اختر مكانًا آخر.','err');return false}
+ }else{
+   sqlDb=new SQL.Database();sqlSchema(sqlDb);saveStateToDb(sqlDb,state);await flushSqlToFile()
+ }
+ storageMode='sqlite';try{localStorage.setItem(DB_KEY,JSON.stringify(state))}catch(e){}
+ applyTheme();renderAll();updateStorageStatus();
+ const issues=dataIntegrityReport();
+ if(issues.length)notify('⚠ تم الاتصال، لكن رُصدت '+issues.length+' ملاحظة على سلامة البيانات — راجع "فحص سلامة البيانات" في الإعدادات.','warn');
+ else if(!opts.silent)notify('تم الاتصال بقاعدة بيانات SQLite بنجاح — الحفظ التلقائي والفوري مفعّل في: '+label,'ok');
+ return true;
+}
+async function chooseStorageFolder(){
+ try{
+   if(window.ekhlasDesktop?.isDesktop&&window.ekhlasDesktop.storage){
+     const r=await window.ekhlasDesktop.storage.chooseFolder();
+     if(r?.canceled)return;
+     if(!r?.ok)throw new Error(r?.message||r?.reason||'تعذر اختيار المجلد');
+     const connected=await connectNativeStorage({silent:true});
+     if(!connected)throw new Error('تعذر فتح قاعدة SQLite بعد اختيار المجلد');
+     closeAppModal();document.getElementById('storageReconnectBanner')?.remove();
+     notify('تم حفظ مكان قاعدة البيانات وسيتم إعادة الاتصال به تلقائيًا عند كل تشغيل.','ok');
+     return;
+   }
+   const handle=await window.showDirectoryPicker({id:'alekhlas-db',mode:'readwrite'});
+   await connectStorageFolder(handle);await idbSaveHandle(handle);closeAppModal();document.getElementById('storageReconnectBanner')?.remove()
+ }catch(e){if(e.name!=='AbortError')notify('تعذر اختيار مكان التخزين: '+e.message,'err')}
+}
 async function chooseStorageFolder(){try{const handle=await window.showDirectoryPicker({id:'alekhlas-db',mode:'readwrite'});await connectStorageFolder(handle);await idbSaveHandle(handle);closeAppModal();document.getElementById('storageReconnectBanner')?.remove()}catch(e){if(e.name!=='AbortError')notify('تعذر اختيار مكان التخزين: '+e.message,'err')}}
 function skipStorageChoice(){try{localStorage.setItem('alekhlas_storage_skip','1')}catch(e){}closeAppModal()}
 function showFirstRunStoragePicker(){openAppModal('أين تريد تخزين بيانات البرنامج؟',`<div style="font-size:15px;line-height:1.8">اختر مجلدًا على جهازك ليقوم البرنامج بإنشاء قاعدة بيانات SQLite بداخله (ملف alekhlas.sqlite) وحفظ كل بياناتك فيه تلقائيًا ولحظيًا مع كل إضافة أو تعديل.<br><br>يمكنك أيضًا المتابعة الآن بدون اختيار مجلد، وستبقى بياناتك محفوظة داخل هذا المتصفح فقط (ويمكنك اختيار مجلد لاحقًا من شاشة الإعدادات).</div>`,`<button class="btn primary" onclick="chooseStorageFolder()">📁 اختيار مكان الحفظ</button><button class="btn" onclick="skipStorageChoice()">المتابعة بدون ذلك الآن</button>`)}
 function showReconnectStorageBanner(handle){if(document.getElementById('storageReconnectBanner'))return;const box=document.createElement('div');box.id='storageReconnectBanner';box.className='btn primary';box.style.cssText='position:fixed;top:14px;left:14px;z-index:9998;box-shadow:0 8px 22px #0004';box.textContent='📁 اضغط لإعادة الاتصال بقاعدة بيانات SQLite المحفوظة مسبقًا';box.onclick=async()=>{try{const perm=await handle.requestPermission({mode:'readwrite'});if(perm==='granted'){await connectStorageFolder(handle,{silent:true});box.remove();notify('تم إعادة الاتصال بقاعدة البيانات بنجاح.','ok')}else{notify('تم رفض الإذن — يستمر الحفظ داخل هذا المتصفح فقط.','warn');box.remove()}}catch(e){notify('تعذر إعادة الاتصال: '+e.message,'err')}};document.body.appendChild(box)}
-function updateStorageStatus(){const el=document.getElementById('storageStatus');if(!el)return;el.textContent=storageMode==='sqlite'?('✅ متصل — يتم الحفظ في ملف SQLite ('+(dirHandle?.name||'')+'/alekhlas.sqlite)'):'💾 التخزين الحالي: داخل هذا المتصفح فقط (لم يتم اختيار مجلد SQLite بعد)'}
-async function initStorage(){if(!('showDirectoryPicker' in window)){updateStorageStatus();return}try{const saved=await idbGetHandle();if(saved){const perm=await saved.queryPermission({mode:'readwrite'});if(perm==='granted'){await connectStorageFolder(saved,{silent:true});return}dirHandle=saved;showReconnectStorageBanner(saved);updateStorageStatus();return}}catch(e){}if(localStorage.getItem('alekhlas_storage_skip')==='1'){updateStorageStatus();return}showFirstRunStoragePicker()}
+function updateStorageStatus(){
+ const el=document.getElementById('storageStatus');if(!el)return;
+ if(storageMode==='sqlite'){
+   const native=window.ekhlasDesktop?.isDesktop&&window.ekhlasDesktop.storage;
+   el.textContent=native?'✅ متصل — الحفظ الفوري في قاعدة SQLite المحفوظة مسبقًا':'✅ متصل — يتم الحفظ في ملف SQLite ('+(dirHandle?.name||'')+'/alekhlas.sqlite)';
+ }else el.textContent='💾 التخزين الحالي: داخل هذا المتصفح فقط (لم يتم اختيار مجلد SQLite بعد)';
+}
+async function initStorage(){
+ // Electron desktop: use the native persisted path. No permission prompt,
+ // no IndexedDB DirectoryHandle, and no recurring reconnect banner.
+ if(window.ekhlasDesktop?.isDesktop&&window.ekhlasDesktop.storage){
+   try{
+     const cfg=await window.ekhlasDesktop.storage.getConfig();
+     if(cfg?.configured){
+       if(cfg.exists){const ok=await connectNativeStorage({silent:true});if(ok)return}
+       notify('⚠ لم يتم العثور على ملف SQLite في المكان المحفوظ. اختر مكان تخزين جديد من الإعدادات.','warn');
+       updateStorageStatus();return;
+     }
+   }catch(e){console.error('Native SQLite startup failed',e);notify('⚠ تعذر تهيئة تخزين SQLite: '+e.message,'err')}
+   if(localStorage.getItem('alekhlas_storage_skip')==='1'){updateStorageStatus();return}
+   showFirstRunStoragePicker();return;
+ }
+ if(!('showDirectoryPicker' in window)){updateStorageStatus();return}
+ try{
+   const saved=await idbGetHandle();
+   if(saved){const perm=await saved.queryPermission({mode:'readwrite'});if(perm==='granted'){await connectStorageFolder(saved,{silent:true});return}dirHandle=saved;showReconnectStorageBanner(saved);updateStorageStatus();return}
+ }catch(e){}
+ if(localStorage.getItem('alekhlas_storage_skip')==='1'){updateStorageStatus();return}
+ showFirstRunStoragePicker();
+}
 function normalize(x){const b=blank();x.students=x.students||[];x.payments=x.payments||[];const usedS=new Set(x.students.filter(s=>/^S-\d+$/.test(s.id)).map(s=>s.id));let nS=1;x.students=x.students.map(s=>{if(/^S-\d+$/.test(s.id))return s;let id;do{id='S-'+(nS++)}while(usedS.has(id));usedS.add(id);return{...s,id}});const usedP=new Set(x.payments.filter(p=>/^P-\d+$/.test(p.id)).map(p=>p.id));let nP=1;x.payments=x.payments.map(p=>{if(/^P-\d+$/.test(p.id))return p;let id;do{id='P-'+(nP++)}while(usedP.has(id));usedP.add(id);return{...p,id}});x.seq={...(x.seq||{}),student:Math.max(0,...x.students.map(s=>Number(String(s.id).replace('S-',''))||0)),payment:Math.max(0,...x.payments.map(p=>Number(String(p.id).replace('P-',''))||0))};x.settings={...b.settings,...(x.settings||{}),invoice:{...b.settings.invoice,...(x.settings?.invoice||{})}};x.seq={...b.seq,...(x.seq||{})};x.courses=x.courses||[];x.trainers=x.trainers||[];x.templates=x.templates||[];return x}
 function persist(){if(!licenseUnlocked){document.getElementById('licenseGate')?.classList.remove('hidden');return}let localOk=true;try{localStorage.setItem(DB_KEY,JSON.stringify(state))}catch(e){localOk=false;console.error('localStorage save failed',e)}applyTheme();renderAll();if(sqlDb){try{saveStateToDb(sqlDb,state);queueSqlFlush()}catch(e){console.error('SQLite persist failed',e);notify('⚠ فشل حفظ البيانات في قاعدة SQLite: '+e.message,'err')}}else if(!localOk){notify('⚠ تعذر حفظ البيانات — مساحة تخزين المتصفح ممتلئة أو غير متاحة. يُنصح باختيار مجلد قاعدة بيانات SQLite من شاشة الإعدادات لتفادي فقدان البيانات.','err')}}
 function uid(p){return p+'-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase()}
