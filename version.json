@@ -1,6 +1,6 @@
 {
-    "version":  "5.8.0",
-    "notes":  "إصلاح التخزين الدائم لقاعدة SQLite، الحفظ اللحظي، استيراد قاعدة سابقة، وفحص التحديثات عند التشغيل والإغلاق مع تنبيه واضح.",
+    "version":  "10.0",
+    "notes":  "",
     "rawUrl":  "https://raw.githubusercontent.com/mmaz19922015-maker/al.ekhlas/main/app.html",
-    "sha256":  "b972ecd2e304b65a6a20995524c45281a3ed2322d734f0b5a63232cbda74af69"
+    "sha256":  "59f9969ca00bae9200c8097d022f8e17b95e1a3d9028858aab1ff183ef7bd7aa"
 }
