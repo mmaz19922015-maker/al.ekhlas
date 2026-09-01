@@ -1,6 +1,6 @@
 {
-    "version":  "10.6.0",
-    "notes":  "",
+    "version":  "10.8.0",
+    "notes":  "إصلاح نظام التحديثات: مزامنة رقم الإصدار بين Electron وapp.html وversion.json، مع التحقق من ملف التحديث المنشور على GitHub.",
     "rawUrl":  "https://raw.githubusercontent.com/mmaz19922015-maker/al.ekhlas/main/app.html",
-    "sha256":  "a74e9729031a78cabe953ebb4a7cc59ab7ac3c719ac7609114da1a045353fcd3"
+    "sha256":  "bc7a6ae364cac7c84b560bc3997cc549403b8c6d4a81e63cc8979a3d08dfba15"
 }
